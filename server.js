@@ -7,6 +7,7 @@
  *
  */
 
+const fs = require('fs')
 const perspective = require('@finos/perspective')
 const express = require('express')
 const expressWs = require('express-ws')
@@ -24,11 +25,28 @@ const manager = new WebSocketManager()
 
 //securities().then(table => manager.host_table("remote_table", table));
 
-const data = {
-  Sales: [500, 1000, 1500],
-  Profit: [100.25, 200.5, 300.75]
-}
-const table = worker.table(data)
+// const dataFile = '/Users/jim/filecoin/deal-fetcher/deals-181142-truncated.json'
+const dataFile = '/Users/jim/filecoin/deal-fetcher/deals-187763.json'
+console.log('Loading')
+const contents = fs.readFileSync(dataFile, 'utf8')
+console.log('Parsing')
+const rawDeals = JSON.parse(contents)
+console.log('Flattening')
+const dealArray = [...Object.entries(rawDeals)].map(([dealNumber, { Proposal, State }]) => ({ dealNumber, ...Proposal, ...State })).map(deal => {
+  let shortLabel = deal && deal.Label
+  if (shortLabel.length > 30) {
+    shortLabel = shortLabel.slice(0,23) + '...' + shortLabel.slice(-4)
+  }
+  const newDeal = {...deal, LabelShort: shortLabel, PieceCID: deal.PieceCID['/']}
+  if (newDeal.StartEpoch >= 0) {
+    newDeal.StartBin = Math.floor(newDeal.StartEpoch / 10000) * 10000
+  }
+  return newDeal
+})
+
+console.log('Loading')
+const table = worker.table(dealArray)
+console.log('Hosting')
 manager.host_table('remote_table', table)
 
 // add connection to manager whenever a new client connects

@@ -9,10 +9,11 @@
 
 <!DOCTYPE html>
 <html>
-
-<head>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
 
     <script src="perspective-viewer.js"></script>
     <script src="perspective-viewer-datagrid.js"></script>
@@ -20,46 +21,65 @@
 
     <script src="perspective.js"></script>
 
-    <link rel='stylesheet' href="index.css">
-    <link rel='stylesheet' href="material.dark.css">
+    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="material.dark.css" />
+  </head>
 
-</head>
-
-<body>
-
-    <perspective-viewer 
-        id="view1"></perspective-viewer>
-    
-    </perspective-viewer>
+  <body>
+    <perspective-viewer id="view1"></perspective-viewer>
 
     <script>
+      window.addEventListener('WebComponentsReady', async function () {
+        // Create two perspective interfaces, one remotely via WebSocket,
+        // and one local via WebWorker.
 
-        window.addEventListener('WebComponentsReady', async function() {
+        const websocket = perspective.websocket(
+          `${window.location.origin.replace('http', 'ws')}/subscribe`
+        )
+        const worker = perspective.worker()
+        worker.initialize_profile_thread()
 
-            // Create two perspective interfaces, one remotely via WebSocket, 
-            // and one local via WebWorker.
-            
-            const websocket = perspective.websocket(`${window.location.origin.replace("http", "ws")}/subscribe`);
-            const worker = perspective.worker();
-            worker.initialize_profile_thread();
+        // Get a proxy for a view named "data_source_one", registered on
+        // the server with a reciprocal call to `host_view()`.
+        // No data is transferred, `view` is a virtual handle for data on
+        // the server.
+        const table = websocket.open_table('remote_table')
 
-            // Get a proxy for a view named "data_source_one", registered on
-            // the server with a reciprocal call to `host_view()`.
-            // No data is transferred, `view` is a virtual handle for data on
-            // the server.
-            const table = websocket.open_table('remote_table');
+        // Create a `table` from this, owned by the local WebWorker.
+        // Data is transferred from `view` to the local WebWorker, both
+        // the current state and all future updates, as Arrows.
+        // const table = worker.table(view, {limit: 10000});
 
-            // Create a `table` from this, owned by the local WebWorker.
-            // Data is transferred from `view` to the local WebWorker, both
-            // the current state and all future updates, as Arrows.
-            // const table = worker.table(view, {limit: 10000});
-            
-            // Load this in the `<perspective-viewer>`.
-            document.getElementById('view1').load(table);
-        });
+        const config = {
+          plugin: 'datagrid',
+          columns: [
+            'dealNumber',
+            'StartEpoch',
+            'LabelShort',
+            'PieceSize'
+          ],
+          filters: [
+            ['SectorStartEpoch', '!=', -1],
+            ['Client', '==', 'f021682']
+          ],
+          'computed-columns': [
+            'concat_comma("Client","Provider")'
+          ],
+          'row-pivots': ['StartBin', 'concat_comma(Client, Provider)'],
+          sort: [
+            ['StartBin', 'asc'],
+            ['PieceSize', 'desc']
+          ],
+          aggregates: { dealNumber: 'count', StartEpoch: 'low', LabelShort: 'distinct count' },
+          selectable: null,
+          editable: null,
+          'column-pivots': null
+        }
+        document.getElementById('view1').restore(config)
 
+        // Load this in the `<perspective-viewer>`.
+        document.getElementById('view1').load(table)
+      })
     </script>
-
-</body>
-
+  </body>
 </html>
