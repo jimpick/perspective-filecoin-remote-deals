@@ -52,29 +52,44 @@
 
         const config = {
           plugin: 'datagrid',
-          columns: [
-            'dealNumber',
-            'StartEpoch',
-            'LabelShort',
-            'PieceSize'
+          'computed-columns': [
+            'concat_comma("Client","Provider")',
+            'invert(invert("PieceSize")) as "TotalSize"'
           ],
+          'row-pivots': [
+            'SectorStartBin1000',
+            'concat_comma(Client, Provider)'
+          ],
+          aggregates: {
+            dealNumber: 'count',
+            StartEpoch: 'low',
+            LabelShort: 'distinct count',
+            SectorStartEpoch: 'low',
+            PieceSize: 'avg',
+            StoragePricePerEpoch: 'avg'
+          },
           filters: [
             ['SectorStartEpoch', '!=', -1],
-            ['Client', '==', 'f021682']
+            ['Provider', '==', 'f022352']
           ],
-          'computed-columns': [
-            'concat_comma("Client","Provider")'
-          ],
-          'row-pivots': ['StartBin', 'concat_comma(Client, Provider)'],
           sort: [
-            ['StartBin', 'asc'],
-            ['PieceSize', 'desc']
+            ['SectorStartBin1000', 'asc'],
+            ['TotalSize', 'desc']
           ],
-          aggregates: { dealNumber: 'count', StartEpoch: 'low', LabelShort: 'distinct count' },
+          columns: [
+            'dealNumber',
+            'SectorStartEpoch',
+            'StartEpoch',
+            'LabelShort',
+            'PieceSize',
+            'TotalSize',
+            'StoragePricePerEpoch'
+          ],
           selectable: null,
           editable: null,
           'column-pivots': null
         }
+
         document.getElementById('view1').restore(config)
 
         // Load this in the `<perspective-viewer>`.

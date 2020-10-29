@@ -26,7 +26,7 @@ const manager = new WebSocketManager()
 //securities().then(table => manager.host_table("remote_table", table));
 
 // const dataFile = '/Users/jim/filecoin/deal-fetcher/deals-181142-truncated.json'
-const dataFile = '/Users/jim/filecoin/deal-fetcher/deals-187763.json'
+const dataFile = './deals-189896.json'
 console.log('Loading')
 const contents = fs.readFileSync(dataFile, 'utf8')
 console.log('Parsing')
@@ -39,7 +39,12 @@ const dealArray = [...Object.entries(rawDeals)].map(([dealNumber, { Proposal, St
   }
   const newDeal = {...deal, LabelShort: shortLabel, PieceCID: deal.PieceCID['/']}
   if (newDeal.StartEpoch >= 0) {
-    newDeal.StartBin = Math.floor(newDeal.StartEpoch / 10000) * 10000
+    newDeal.StartBin10000 = Math.floor(newDeal.StartEpoch / 10000) * 10000
+    newDeal.StartBin1000 = Math.floor(newDeal.StartEpoch / 1000) * 1000
+  }
+  if (newDeal.SectorStartEpoch >= 0) {
+    newDeal.SectorStartBin10000 = Math.floor(newDeal.SectorStartEpoch / 10000) * 10000
+    newDeal.SectorStartBin1000 = Math.floor(newDeal.SectorStartEpoch / 1000) * 1000
   }
   return newDeal
 })
