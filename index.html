@@ -66,14 +66,16 @@
             LabelShort: 'distinct count',
             SectorStartEpoch: 'low',
             PieceSize: 'avg',
-            StoragePricePerEpoch: 'avg'
+            StoragePricePerEpoch: 'avg',
+            SlingshotName: 'dominant',
+            SlingshotRank: 'dominant'
           },
           filters: [
             ['SectorStartEpoch', '!=', -1],
-            ['Provider', '==', 'f022352']
+            ['SlingshotName', '!=', '']
           ],
           sort: [
-            ['SectorStartBin1000', 'asc'],
+            ['SectorStartBin1000', 'desc'],
             ['TotalSize', 'desc']
           ],
           columns: [
@@ -83,7 +85,9 @@
             'LabelShort',
             'PieceSize',
             'TotalSize',
-            'StoragePricePerEpoch'
+            'StoragePricePerEpoch',
+            'SlingshotName',
+            'SlingshotRank'
           ],
           selectable: null,
           editable: null,

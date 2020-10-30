@@ -26,11 +26,14 @@ const manager = new WebSocketManager()
 //securities().then(table => manager.host_table("remote_table", table));
 
 // const dataFile = '/Users/jim/filecoin/deal-fetcher/deals-181142-truncated.json'
-const dataFile = './deals-189896.json'
 console.log('Loading')
+const dataFile = './deals-189896.json'
 const contents = fs.readFileSync(dataFile, 'utf8')
+const slingshotFile = './client-id-to-teams.json'
+const slingshotContent = fs.readFileSync(slingshotFile, 'utf8')
 console.log('Parsing')
 const rawDeals = JSON.parse(contents)
+const slingshot = JSON.parse(slingshotContent)
 console.log('Flattening')
 const dealArray = [...Object.entries(rawDeals)].map(([dealNumber, { Proposal, State }]) => ({ dealNumber, ...Proposal, ...State })).map(deal => {
   let shortLabel = deal && deal.Label
@@ -45,6 +48,17 @@ const dealArray = [...Object.entries(rawDeals)].map(([dealNumber, { Proposal, St
   if (newDeal.SectorStartEpoch >= 0) {
     newDeal.SectorStartBin10000 = Math.floor(newDeal.SectorStartEpoch / 10000) * 10000
     newDeal.SectorStartBin1000 = Math.floor(newDeal.SectorStartEpoch / 1000) * 1000
+  }
+  if (slingshot[deal.Client]) {
+    const { name, rank, url } = slingshot[deal.Client]
+    console.log('Client:', deal.Client, name)
+    newDeal.SlingshotName = name
+    newDeal.SlingshotRank = rank
+    newDeal.SlingshotURL = url
+  } else {
+    newDeal.SlingshotName = ''
+    newDeal.SlingshotRank = ''
+    newDeal.SlingshotURL = ''
   }
   return newDeal
 })
