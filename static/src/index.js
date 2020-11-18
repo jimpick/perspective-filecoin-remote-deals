@@ -95,7 +95,7 @@ window.addEventListener('load', async () => {
     return array
   }
 
-  const compressed = await download(33947900)
+  const compressed = await download(40171740)
   status.textContent = `Uncompressing data... (compressed size: ${compressed.byteLength} bytes)`
   await delay(100)
   const buffer = pako.ungzip(compressed)

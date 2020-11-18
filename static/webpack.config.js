@@ -19,7 +19,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebPackPlugin({
-            title: "Perspective Webpack Example"
+            title: "Slingshot Deal History"
         }),
         new PerspectivePlugin()
     ],

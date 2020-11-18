@@ -15,7 +15,7 @@ const worker = perspective
 // perspective.initialize_profile_thread()
 
 console.log('Loading')
-const dataFile = './deals-189896.json'
+const dataFile = './deals-245137.json'
 const contents = fs.readFileSync(dataFile, 'utf8')
 const slingshotFile = './client-id-to-teams.json'
 const slingshotContent = fs.readFileSync(slingshotFile, 'utf8')
