@@ -56,24 +56,23 @@
             'concat_comma("Client","Provider")',
             'invert(invert("PieceSize")) as "TotalSize"'
           ],
-          'row-pivots': [
-            'SectorStartBin1000',
-            'concat_comma(Client, Provider)'
-          ],
+          'row-pivots': ['SectorStartBin1000', 'concat_comma(Client, Provider)'],
           aggregates: {
+            Client: 'dominant',
             dealNumber: 'count',
             StartEpoch: 'low',
             LabelShort: 'distinct count',
             SectorStartEpoch: 'low',
             PieceSize: 'avg',
-            StoragePricePerEpoch: 'avg'
+            StoragePricePerEpoch: 'avg',
+            SlingshotName: 'dominant',
+            SlingshotRank: 'dominant'
           },
           filters: [
-            ['SectorStartEpoch', '!=', -1],
-            ['Provider', '==', 'f022352']
+            ['SectorStartEpoch', '!=', -1]
           ],
           sort: [
-            ['SectorStartBin1000', 'asc'],
+            ['SectorStartBin1000', 'desc'],
             ['TotalSize', 'desc']
           ],
           columns: [
@@ -83,7 +82,10 @@
             'LabelShort',
             'PieceSize',
             'TotalSize',
-            'StoragePricePerEpoch'
+            'StoragePricePerEpoch',
+            'Client',
+            'SlingshotName',
+            'SlingshotRank'
           ],
           selectable: null,
           editable: null,
