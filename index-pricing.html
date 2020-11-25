@@ -1,0 +1,95 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+
+    <script src="perspective-viewer.js"></script>
+    <script src="perspective-viewer-datagrid.js"></script>
+    <script src="perspective-viewer-d3fc.js"></script>
+
+    <script src="perspective.js"></script>
+
+    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="material.dark.css" />
+  </head>
+
+  <body>
+    <perspective-viewer id="view1"></perspective-viewer>
+
+    <script>
+      window.addEventListener('WebComponentsReady', async function () {
+        // Create two perspective interfaces, one remotely via WebSocket,
+        // and one local via WebWorker.
+
+        const websocket = perspective.websocket(
+          `${window.location.origin.replace('http', 'ws')}/subscribe`
+        )
+        const worker = perspective.worker()
+        worker.initialize_profile_thread()
+
+        // Get a proxy for a view named "data_source_one", registered on
+        // the server with a reciprocal call to `host_view()`.
+        // No data is transferred, `view` is a virtual handle for data on
+        // the server.
+        const table = websocket.open_table('remote_table')
+
+        // Create a `table` from this, owned by the local WebWorker.
+        // Data is transferred from `view` to the local WebWorker, both
+        // the current state and all future updates, as Arrows.
+        // const table = worker.table(view, {limit: 10000});
+
+        const config = {
+          plugin: 'datagrid',
+          'computed-columns': [
+            'concat_comma("Client","Provider")',
+            'invert(invert("PieceSize")) as "TotalSize"'
+          ],
+          'row-pivots': ['SectorStartBin1000', 'StoragePricePerEpoch'],
+          aggregates: {
+            Client: 'dominant',
+            dealNumber: 'count',
+            StartEpoch: 'low',
+            LabelShort: 'distinct count',
+            SectorStartEpoch: 'low',
+            PieceSize: 'avg',
+            StoragePricePerEpoch: 'avg',
+            SlingshotName: 'dominant',
+            SlingshotRank: 'dominant'
+          },
+          filters: [['SectorStartEpoch', '!=', -1]],
+          sort: [
+            ['SectorStartBin1000', 'desc'],
+            ['StoragePricePerEpoch', 'desc']
+          ],
+          columns: [
+            'dealNumber',
+            'SectorStartEpoch',
+            'StartEpoch',
+            'LabelShort',
+            'TotalSize'
+          ],
+          selectable: null,
+          editable: null,
+          'column-pivots': null
+        }
+
+        document.getElementById('view1').restore(config)
+
+        // Load this in the `<perspective-viewer>`.
+        document.getElementById('view1').load(table)
+      })
+    </script>
+  </body>
+</html>

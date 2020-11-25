@@ -26,7 +26,7 @@ const manager = new WebSocketManager()
 //securities().then(table => manager.host_table("remote_table", table));
 
 // const dataFile = '/Users/jim/filecoin/deal-fetcher/deals-181142-truncated.json'
-const dataFile = './deals-245137.json'
+const dataFile = './deals-267529.json'
 console.log('Loading')
 const contents = fs.readFileSync(dataFile, 'utf8')
 const slingshotFile = './client-id-to-teams.json'
