@@ -26,7 +26,7 @@ const manager = new WebSocketManager()
 //securities().then(table => manager.host_table("remote_table", table));
 
 // const dataFile = '/Users/jim/filecoin/deal-fetcher/deals-181142-truncated.json'
-const dataFile = './deals-267529.json'
+const dataFile = './deals-869783-raw.json'
 console.log('Loading')
 const contents = fs.readFileSync(dataFile, 'utf8')
 const slingshotFile = './client-id-to-teams.json'
@@ -35,7 +35,7 @@ console.log('Parsing')
 const rawDeals = JSON.parse(contents)
 const slingshot = JSON.parse(slingshotContent)
 console.log('Flattening')
-const dealArray = [...Object.entries(rawDeals)].map(([dealNumber, { Proposal, State }]) => ({ dealNumber, ...Proposal, ...State })).map(deal => {
+const dealArray = [...Object.entries(rawDeals.result)].map(([dealNumber, { Proposal, State }]) => ({ dealNumber, ...Proposal, ...State })).map(deal => {
   let shortLabel = deal && deal.Label
   if (shortLabel.length > 30) {
     shortLabel = shortLabel.slice(0,23) + '...' + shortLabel.slice(-4)
@@ -73,6 +73,6 @@ app.ws('/subscribe', ws => manager.add_connection(ws))
 
 app.use('/', perspective_assets([__dirname], true))
 
-const server = app.listen(8080, () =>
+const server = app.listen(18080, () =>
   console.log(`Listening on port ${server.address().port}`)
 )
